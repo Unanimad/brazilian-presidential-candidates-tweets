@@ -1,0 +1,10 @@
+import csv
+import twitter
+import time
+import datetime
+
+TWITTER_API_CONSUMER_KEY = ''
+TWITTER_API_CONSUMER_SECRET_KEY = ''
+TWITTER_API_ACCESS_TOKEN = ''
+TWITTER_API_ACCESS_TOKEN_SECRET = ''
+
