@@ -2,8 +2,8 @@ import csv
 
 from utils import conn_api, add_profile, get_statuses_between_dates
 
-start_at = '01012019'
-end_at = '01062019'
+start_at = ''
+end_at = ''
 
 targets = [
     'jairbolsonaro', 'Haddad_Fernando', 'alvarodias_', 'CaboDaciolo', 'cirogomes',
