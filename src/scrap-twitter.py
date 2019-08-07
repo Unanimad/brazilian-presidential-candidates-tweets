@@ -33,9 +33,14 @@ for target in targets:
 
     csv_file.close()
 
-    csv_file = open(f'../data/{target.lower()}_election_tweets.csv', 'w+', newline='', encoding='utf-8')
+    csv_file = open(
+        f'../data/tweets/{target.lower()}_election_tweets.csv', 'w+',
+        newline='', encoding='utf-8'
+    )
+
     writer = csv.writer(csv_file, delimiter=';', quotechar='"')
-    writer.writerow(["id", "created_at", "text"])
+    writer.writerow(['id', 'created_at', 'text',
+                     'retweet_count', 'favorite_count'])
 
     get_statuses_between_dates(api, target, start_at, end_at, writer)
 

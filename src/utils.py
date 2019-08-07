@@ -52,44 +52,52 @@ def get_statuses_between_dates(api, screen_name, start_at, end_at, writer):
         Saved tweets
     """
 
+    last_id = 0 
+    tweets = []
+
     start_at = datetime.datetime.strptime(start_at, '%d%m%Y')
     end_at = datetime.datetime.strptime(end_at, '%d%m%Y')
 
     print(f"Fetching tweets from @{screen_name}!")
 
-    tmp_statuses = api.GetUserTimeline(screen_name=screen_name)
+    tmp_statuses = api.GetUserTimeline(screen_name=screen_name, trim_user=True)
 
-    if len(tmp_statuses) > 0:
+    for status in tmp_statuses:
+        created_at = twitter_date(status.created_at)
+
+        if start_at < created_at < end_at:
+            if status.id not in tweets:
+                tweets.append(status.id)
+                add_status(status, screen_name, writer)
+
+    while (twitter_date(tmp_statuses[-1].created_at) > start_at):
+        tmp_statuses = api.GetUserTimeline(
+            screen_name=screen_name, trim_user=True, max_id=tmp_statuses[-1].id)
+
+        if status.id == tmp_statuses[-1].id:
+            print(f'More than 3.2k tweets were post since {end_at}')
+            break
+
+        last_id = tmp_statuses[-1].id
+
         for status in tmp_statuses:
             created_at = twitter_date(status.created_at)
 
-            if created_at < end_at and created_at > start_at:
-                add_status(status, screen_name, writer)
-
-        last_status = 0
-
-        while twitter_date(tmp_statuses[-1].created_at) > start_at:
-            tmp_statuses = api.GetUserTimeline(
-                screen_name=screen_name, max_id=tmp_statuses[-1].id)
-
-            if last_status == tmp_statuses[-1].id:
-                break
-
-            last_status = tmp_statuses[-1].id
-
-            for status in tmp_statuses:
-                created_at = twitter_date(status.created_at)
-
-                if created_at < end_at and created_at > start_at:
+            if start_at < created_at < end_at:
+                if status.id not in tweets:
+                    tweets.append(status.id)
                     add_status(status, screen_name, writer)
 
-    else:
-        print('No tweets posted!')
+    tweets = []
 
 
 def add_status(status, screen_name, writer):
-    output = [status.id, twitter_date(
-        status.created_at), status.full_text.replace("\n", "")]
+    """ Add a Tweet """
+    output = [
+        status.id, twitter_date(status.created_at),
+        status.full_text.replace("\n", ""), status.retweet_count,
+        status.favorite_count
+    ]
     writer.writerow(output)
 
 
@@ -101,7 +109,6 @@ def add_profile(api, screen_name, writer):
     Returns:
         User object
     """
-    # api = conn_api()
 
     try:
         user = api.GetUser(screen_name=screen_name)
@@ -109,9 +116,10 @@ def add_profile(api, screen_name, writer):
         print(error.args)
     else:
         output = [
-            user.id, user.name, user.screen_name, user.location, user.url, user.description, user.protected, user.verified,
-            user.followers_count, user.friends_count, user.favourites_count, user.statuses_count, twitter_date(
-                user.created_at),
+            user.id, user.name, user.screen_name, user.location,
+            user.url, user.description, user.protected, user.verified,
+            user.followers_count, user.friends_count, user.favourites_count,
+            user.statuses_count, twitter_date(user.created_at),
             user.profile_image_url,
         ]
 
